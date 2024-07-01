@@ -1,4 +1,13 @@
-<?php require_once '../src/lib/func.php'; ?>
+<?php
+
+require_once '../../vendor/autoload.php';
+
+use App\Builders\ConfigBuilder;
+
+$projectRoot = __DIR__ . '/../../../';
+$config = ConfigBuilder::buildOld($projectRoot);
+
+?>
 <!DOCTYPE html>
 <html lang="en" class="h-100" data-bs-theme="auto">
 <head>
@@ -19,6 +28,11 @@
             <div class="collapse navbar-collapse" id="navbarColor04">
                 <ul class="navbar-nav ms-md-auto ">
                     <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            New UI
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" target="_blank" href="https://github.com/pkolomeitsev/docker-dev-env">
                             <img src="assets/imgs/github.png" height="16" alt="GitHub"> GitHub
                         </a>
@@ -36,7 +50,7 @@
         <div class="row g-3 mb-3">
             <div class="col-md-5">
                 <select class="form-select" id="projects" name="projects">
-                    <?php foreach (getListOfTheProjects() as $site): ?>
+                    <?php foreach ($config['projects'] as $site): ?>
                         <option value="<?= $site; ?>"><?php echo $site; ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -53,7 +67,7 @@
         /**
          * Render application links
          */
-        foreach (getAppList() as $app => $uri) {
+        foreach ($config['appList'] as $app => $uri) {
             echo sprintf('<a href="%s" class="btn btn-lg btn-primary" role="button" target="_blank">%s</a>', $uri, $app) . PHP_EOL;
         }
         ?>
@@ -66,11 +80,11 @@
                         <h4 class="my-0 fw-normal">PHP</h4>
                     </div>
                     <div class="card-body">
-                        <h1 class="card-title">v<?php echo phpversion(); ?></h1>
+                        <h1 class="card-title">v<?php echo $config['php']['version']; ?></h1>
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>Memory usage: <?php echo convert(memory_get_usage(true)); ?></li>
-                            <li>Memory limit: <?php echo ini_get('memory_limit'); ?></li>
-                            <li><?php echo php_uname(); ?></li>
+                            <li>Memory usage: <?php echo $config['php']['memoryUsage']; ?></li>
+                            <li>Memory limit: <?php echo $config['php']['memoryLimit']; ?></li>
+                            <li><?php echo $config['php']['info']; ?></li>
                         </ul>
                     </div>
                 </div>
@@ -81,12 +95,12 @@
                         <h4 class="my-0 fw-normal">MySQL</h4>
                     </div>
                     <div class="card-body">
-                        <?php $mysqlInfo = getMysqlInfo(); ?>
-                        <h1 class="card-title">v<?php echo $mysqlInfo['SERVER_VERSION']; ?></h1>
+                        <?php $mysqlInfo = $config['mysql']; ?>
+                        <h1 class="card-title">v<?php echo $mysqlInfo['version']; ?></h1>
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>Client version: <?php echo $mysqlInfo['CLIENT_VERSION']; ?></li>
-                            <li>Connection status: <?php echo $mysqlInfo['CONNECTION_STATUS']; ?></li>
-                            <li><?php echo $mysqlInfo['SERVER_INFO']; ?></li>
+                            <li>Client version: <?php echo $mysqlInfo['clientVer']; ?></li>
+                            <li>Connection status: <?php echo $mysqlInfo['connectionStatus']; ?></li>
+                            <li><?php echo $mysqlInfo['info']; ?></li>
                         </ul>
                     </div>
                 </div>
@@ -97,11 +111,10 @@
                         <h4 class="my-0 fw-normal">NGiNX</h4>
                     </div>
                     <div class="card-body">
-                        <?php $nginxInfo = getNginxInfo(); ?>
+                        <?php $nginxInfo = $config['nginx']; ?>
                         <h1 class="card-title">v<?php echo $nginxInfo['version']; ?></h1>
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>IP: <?php echo $_SERVER['SERVER_ADDR']; ?></li>
-
+                            <li>IP: <?php echo $nginxInfo['ip']; ?></li>
                         </ul>
                     </div>
                 </div>
@@ -126,12 +139,11 @@
             redirect()
         });
         document.getElementById('httpsBtn').addEventListener('click', function (ev) {
-            redirect(true)
+            redirect('https://')
         });
 
-        function redirect(ssl = false) {
+        function redirect(protocol = 'http://') {
             let project = document.getElementById("projects").value;
-            let protocol = (ssl) ? 'https://' : 'http://';
 
             window.open(
                 protocol + project,
