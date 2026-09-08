@@ -22,6 +22,11 @@ Build the application
 # See more details about build script
 ./build.sh --help
 ```
+Run application
+```bash
+./build.sh --run
+```
+
 As alternative, it is still possible to use `docker-compose up -d` command.
 
 After that visit Admin Panel http://localhost/ to see new projects available.
