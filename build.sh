@@ -49,8 +49,12 @@ while [[ $# -gt 0 ]]; do
       docker compose up -d --build
       exit 1
       ;;
-    --run)
+    --run-detach)
       docker compose up -d
+      exit 1
+      ;;
+    --run)
+      docker compose up
       exit 1
       ;;
     --down)
